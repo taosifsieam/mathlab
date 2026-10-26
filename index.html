@@ -432,7 +432,7 @@ $('#dadd').onclick=async()=>{err('der','');try{await rpc('admin_schedule_daily',
 LH.sel=[];
 const xfill=()=>{$('#xp_c').innerHTML=copts($('#xe_s').value,true);xlistQ()};
 async function xlistQ(){const s=$('#xe_s').value,c=$('#xp_c').value;if(!s){return}try{const d=await rpc('admin_list_questions',{p_subject:s,p_chapter:c?+c:null,p_status:'published',p_limit:50,p_offset:0});
-$('#xp_l').innerHTML=d.rows.length?d.rows.map(x=>`<label style="font-weight:400;display:flex;gap:8px;align-items:flex-start;margin:4px 0"><input type="checkbox" data-q="${x.id}" style="width:auto;margin-top:5px"> <span><b>#${x.id}</b> ${esc(x.body)}</span></label>`).join(''):'No published questions for this selection.'}catch(x){$('#xp_l').textContent=emsg(x)}}
+$('#xp_l').innerHTML=d.rows.length?d.rows.map(x=>`<label style="font-weight:400;display:flex;gap:8px;align-items:flex-start;margin:4px 0"><input type="checkbox" data-q="${x.id}" style="width:auto;margin-top:5px"> <span><b>#${x.id}</b> ${esc(x.body)}</span></label>`).join(''):'No published questions for this selection.';mathify()}catch(x){$('#xp_l').textContent=emsg(x)}}
 const xsel=()=>{$('#xp_s').textContent=LH.sel.length+' question'+(LH.sel.length==1?'':'s')+' selected'+(LH.sel.length?' (IDs '+LH.sel.join(', ')+')':'')+'. Total marks: '+(LH.sel.length*(+$('#xe_m').value||1))};
 $('#xe_s').onchange=()=>{LH.sel=[];xfill();xsel()};$('#xp_c').onchange=xlistQ;$('#xe_m').oninput=xsel;
 $('#xp_a').onclick=()=>{$$('#xp_l input:checked').forEach(c=>{const id=+c.dataset.q;if(!LH.sel.includes(id))LH.sel.push(id)});xsel()};
@@ -446,7 +446,7 @@ await xlistE();
 async function qlist(){const d=await rpc('admin_list_questions',{p_subject:null,p_chapter:null,p_status:null,p_limit:20,p_offset:LH.qo});
 $('#ql').innerHTML=(d.rows.length?d.rows.map(x=>`<p style="border-bottom:1px solid var(--bd);padding:6px 0"><b>#${x.id}</b> <span class="tag">${esc(x.status)}</span> ${esc(x.body)} ${x.status==='published'?`<a href="#" data-s="archived" data-i="${x.id}">Archive</a>`:`<a href="#" data-s="published" data-i="${x.id}">Publish</a>`}</p>`).join(''):'<p class="ex">No questions yet.</p>')+`<p class="ex">Total ${d.total} · <a href="#" id="aqp">Previous</a> · <a href="#" id="qn">Next</a></p>`;
 $$('#ql [data-s]').forEach(a=>a.onclick=async e=>{e.preventDefault();try{await rpc('admin_set_question_status',{p_id:+a.dataset.i,p_status:a.dataset.s});qlist()}catch(x){toast(emsg(x))}});
-$('#aqp').onclick=e=>{e.preventDefault();LH.qo=Math.max(0,LH.qo-20);qlist()};$('#qn').onclick=e=>{e.preventDefault();if(LH.qo+20<d.total){LH.qo+=20;qlist()}}}
+$('#aqp').onclick=e=>{e.preventDefault();LH.qo=Math.max(0,LH.qo-20);qlist()};$('#qn').onclick=e=>{e.preventDefault();if(LH.qo+20<d.total){LH.qo+=20;qlist()}};mathify()}
 await qlist()}};
 $$('[data-br]').forEach(e=>e.innerHTML=BR[e.dataset.br]);
 $$('[data-ic]').forEach(e=>e.innerHTML=ic(e.dataset.ic));
