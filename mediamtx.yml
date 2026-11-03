@@ -1,0 +1,66 @@
+# MathLab live streaming server (MediaMTX). Replace YOUR-SITE.vercel.app and keep the secrets out of this file:
+# the two ${...} values come from the .env file next to docker-compose.yml.
+logLevel: info
+
+# ---- who may publish / watch: ask the MathLab website for every request ----
+authMethod: http
+authHTTPAddress: https://YOUR-SITE.vercel.app/api/stream-auth
+# "api", "metrics" and "pprof" are never approved by the website, so they stay private.
+authHTTPExclude:
+  - action: api
+  - action: metrics
+  - action: pprof
+
+# ---- ingest: OBS publishes here (RTMPS = encrypted RTMP) ----
+rtmp: yes
+rtmpAddress: :1935
+rtmpEncryption: "optional"          # "strict" to force rtmps:// only (then also set rtmpServerKey/Cert)
+rtmpServerKey: /certs/privkey.pem
+rtmpServerCert: /certs/fullchain.pem
+
+# ---- delivery: browsers watch HLS ----
+hls: yes
+hlsAddress: :8888
+hlsAllowOrigin: 'https://YOUR-SITE.vercel.app'     # only your website may embed the stream
+hlsVariant: lowLatency                              # ~3-5 s delay; use "mpegts" if you prefer maximum compatibility
+hlsSegmentCount: 7
+hlsSegmentDuration: 1s
+hlsPartDuration: 200ms
+hlsAlwaysRemux: no
+hlsEncryption: no                                   # TLS is terminated by Caddy (see Caddyfile)
+
+# ---- recording: every class is saved to disk as fMP4 segments ----
+record: yes
+recordPath: /recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+recordFormat: fmp4
+recordPartDuration: 1s
+recordSegmentDuration: 6h
+recordDeleteAfter: 0s                               # keep forever; delete from the server when you decide
+
+# ---- playback server (serves recordings to students, protected by the same auth) ----
+playback: yes
+playbackAddress: :9996
+playbackAllowOrigin: 'https://YOUR-SITE.vercel.app'
+
+# ---- internal control API: bound to localhost only ----
+api: yes
+apiAddress: 127.0.0.1:9997
+
+# Other protocols are switched off on purpose (smaller attack surface).
+rtsp: no
+webrtc: no
+srt: no
+
+paths:
+  # Only paths of the form live/<session-id> can exist. Anything else is refused.
+  "~^live/[0-9a-f-]{36}$":
+    source: publisher
+    # Tell the website when the stream starts / stops. The class then turns LIVE / starts its reconnect grace period.
+    runOnReady: >
+      curl -fsS -m 8 -X POST https://YOUR-SITE.vercel.app/api/stream-event
+      -H "content-type: application/json" -H "x-hook-secret: $HOOK_SECRET"
+      -d "{\"path\":\"$MTX_PATH\",\"event\":\"ready\"}"
+    runOnNotReady: >
+      curl -fsS -m 8 -X POST https://YOUR-SITE.vercel.app/api/stream-event
+      -H "content-type: application/json" -H "x-hook-secret: $HOOK_SECRET"
+      -d "{\"path\":\"$MTX_PATH\",\"event\":\"notready\"}"

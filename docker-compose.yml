@@ -1,0 +1,24 @@
+# Run on a small Linux VPS (2 vCPU / 4 GB RAM is enough to start). Needs Docker.
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:1.9.3
+    restart: unless-stopped
+    network_mode: host                  # simplest: exposes 1935 (RTMP) and, for Caddy on the same host, 8888/9996 on localhost
+    environment:
+      HOOK_SECRET: ${HOOK_SECRET}       # must equal HOOK_SECRET in Vercel
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml:ro
+      - ./recordings:/recordings
+      - /etc/letsencrypt/live/${STREAM_HOST}:/certs:ro   # optional: only for rtmps://
+
+  caddy:                                # HTTPS in front of HLS + playback (automatic Let's Encrypt certificate)
+    image: caddy:2
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    environment:
+      STREAM_HOST: ${STREAM_HOST}
+volumes:
+  caddy_data:
