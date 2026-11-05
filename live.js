@@ -273,7 +273,7 @@ html[data-theme=dark] .lv-nl{background:#0e162a}html[data-theme=dark] .lv-msg{ba
     <div class="card" style="margin-top:14px"><h3>Sessions</h3><p class="ex">Times are in Dhaka time. The class turns LIVE automatically when OBS starts streaming.</p><div id="lvlist"></div></div>
     <div class="card" style="margin-top:14px"><h3>Recordings</h3><div id="lvrec"></div></div>
     <div class="card" style="margin-top:14px"><h3>Course access (enrolments)</h3><p class="ex">Give a registered student access to a course (for example after a bKash payment you have checked).</p>
-      <div class="grid"><label>Student email<input id="eem" type="email"></label><label>Course<input id="ecr" list="lvcl" maxlength="120"></label></div><p class="err" id="eer"></p><button type="button" id="egrant">Grant access</button><div id="elist" style="margin-top:12px;overflow-x:auto"></div></div>
+      <div class="grid"><label>Student email<input id="eem" type="email"></label><label>Course<input id="ecr" list="lvcl" maxlength="120"></label><label>Access days (empty = course default)<input id="eda" type="number" min="1" max="3650"></label></div><p class="err" id="eer"></p><button type="button" id="egrant">Grant access</button><div id="elist" style="margin-top:12px;overflow-x:auto"></div></div>
     <div class="card" style="margin-top:14px"><h3>Streaming configuration</h3><p class="ex">The address OBS connects to. Your streaming server’s address goes here after you set it up (see LIVE-GUIDE.md).</p>
       <div class="grid"><label>RTMP server URL (for OBS)<input id="srtmp" placeholder="rtmp://stream.yourdomain.com/live" value="${esc(st.rtmp_url || '')}"></label>
       <label>Reconnect grace period (seconds, 30–900)<input id="sgr" type="number" min="30" max="900" value="${st.grace_seconds || 120}"></label></div><p class="err" id="ser"></p><button type="button" id="ssave">Save configuration</button></div></div>`;
@@ -297,7 +297,7 @@ html[data-theme=dark] .lv-nl{background:#0e162a}html[data-theme=dark] .lv-msg{ba
     };
     $('#egrant').onclick = async () => {
       const er = $('#eer'); er.textContent = '';
-      try { const r = await rpc('admin_enrollment_grant', { p_email: $('#eem').value, p_course: $('#ecr').value }); if (!r.ok) throw new Error(r.error); toast('Access granted.'); $('#eem').value = ''; await drawEnr(); } catch (e) { er.textContent = emsg(e); }
+      try { const r = await rpc('admin_enrollment_grant', { p_email: $('#eem').value, p_course: $('#ecr').value, p_days: $('#eda').value ? +$('#eda').value : null }); if (!r.ok) throw new Error(r.error); toast('Access granted.'); $('#eem').value = ''; await drawEnr(); } catch (e) { er.textContent = emsg(e); }
     };
     await Promise.all([drawList(), drawRec(), drawEnr()]);
     every(() => { if (LH.tab === 'livectl' && !room) pollList(); }, 15000);
@@ -374,7 +374,7 @@ html[data-theme=dark] .lv-nl{background:#0e162a}html[data-theme=dark] .lv-msg{ba
 
   async function drawEnr() {
     const r = await rpc('admin_enrollment_list', { p_limit: 50 }), b = $('#elist'); if (!b) return;
-    b.innerHTML = `<table><thead><tr><th>Student</th><th>Email</th><th>Course</th><th>Status</th><th></th></tr></thead><tbody>${r.map(e => `<tr><td>${esc(e.name || '')}</td><td>${esc(e.email || '')}</td><td>${esc(e.course)}</td><td>${esc(e.status)}</td><td>${e.status === 'cancelled' ? '' : `<button type="button" class="btn o" data-rv="${e.id}">Revoke</button>`}</td></tr>`).join('')}</tbody></table>`;
+    b.innerHTML = `<table><thead><tr><th>Student</th><th>Email</th><th>Course</th><th>Status</th><th>Access until</th><th></th></tr></thead><tbody>${r.map(e => `<tr><td>${esc(e.name || '')}</td><td>${esc(e.email || '')}</td><td>${esc(e.course)}</td><td>${esc(e.status)}</td><td>${e.expires_at ? esc(fmt(e.expires_at, { day: '2-digit', month: 'short', year: 'numeric' })) : 'No expiry'}</td><td>${e.status === 'cancelled' ? '' : `<button type="button" class="btn o" data-rv="${e.id}">Revoke</button>`}</td></tr>`).join('')}</tbody></table>`;
     $$('[data-rv]').forEach(x => x.onclick = async () => { if (confirm('Remove this student’s access to the course?')) { await rpc('admin_enrollment_revoke', { p_id: +x.dataset.rv }); await drawEnr(); } });
   }
 
