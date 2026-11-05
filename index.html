@@ -294,6 +294,7 @@ const C=[
 const wa=c=>'https://wa.me/8801608224262?text='+encodeURIComponent('I want to enroll in: '+c.t+(U?'\nAccount: '+(U.email||U.phone):''));
 const card=c=>`<div class="card">${c.best?'<span class="tag best">★ Best Deal</span><br>':''}<img class="th" alt="${c.t}" loading="lazy" src="data:image/webp;base64,${T[c.th]}"><span class="tag">${c.tg}</span> <span class="tag">Recorded</span> <span class="tag">Premium</span><h3>${ic('book')} ${c.t}</h3><p class="ex" style="margin:0">${c.v} · Complete Syllabus | One Course</p><div class="pr">৳${c.p}/- <small>BDT</small></div><div class="obj"><b>${ic('target')} কোর্সের লক্ষ্য</b><p>${c.o}</p></div><b class="bh">${ic('award')} এই কোর্সে যা পাবেন</b><ul class="bl">${c.b.map(x=>`<li>${ic('check')}<span>${x}</span></li>`).join('')}</ul><p class="gd">${ic('users')}<span>${c.g}</span></p><a class="btn" data-gate data-e="${C.indexOf(c)}" target="_blank" rel="noopener" href="${wa(c)}">Enroll Now</a></div>`;
 $('#show').innerHTML=C.map(card).join('');
+window.MLThumb=t=>{const n=String(t||'').trim().toLowerCase(),c=C.find(x=>x.t.toLowerCase()===n);return c?'data:image/webp;base64,'+T[c.th]:null};
 const mh=C.map(c=>`<a href="#courses" aria-label="${c.t}"><img alt="${c.t}" src="data:image/webp;base64,${T[c.th]}"></a>`).join('');$('#mq').innerHTML=mh+mh.replaceAll('<a ','<a aria-hidden="true" tabindex="-1" ');
 function renderCourses(){const q=$('#q').value.toLowerCase(),l=$('#fl').value;
 const r=C.filter(c=>(!q||(c.t+' '+c.l+' '+c.tg+' '+c.v+' '+c.o+c.b.join(' ')).toLowerCase().includes(q))&&(!l||c.l===l));

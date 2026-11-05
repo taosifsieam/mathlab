@@ -53,6 +53,7 @@ html[data-theme=dark] .cr-pill.exp{background:#7f1d1d;color:#fecaca}html[data-th
     }
     cur = null;
   }
+  const thumb = c => (window.MLThumb && (MLThumb(c.title) || MLThumb(c.enroll_name))) || '';
   K.leave = () => { stop(true); };
 
   /* ================= Student ================= */
@@ -64,7 +65,7 @@ html[data-theme=dark] .cr-pill.exp{background:#7f1d1d;color:#fecaca}html[data-th
       <button type="button" data-lesson="${c.lesson_id}">Resume lesson</button></div>`).join('') : '';
     z.innerHTML = contHtml + (cs.length ? `<div class="cr-grid">${cs.map(c => {
       const p = pct(c.lessons_done, c.lessons_total);
-      return `<div class="cr-card"><div class="cr-th">${c.thumbnail_url ? `<img alt="" loading="lazy" src="${esc(c.thumbnail_url)}">` : esc(c.title)}</div><div class="cr-body">
+      return `<div class="cr-card"><div class="cr-th">${(c.thumbnail_url || thumb(c)) ? `<img alt="" loading="lazy" src="${esc(c.thumbnail_url || thumb(c))}">` : esc(c.title)}</div><div class="cr-body">
         <div><span class="cr-pill ${c.enrolled ? 'on' : c.expired ? 'exp' : 'off'}">${c.enrolled ? 'Enrolled' : c.expired ? 'Access expired' : 'Not enrolled'}</span>${c.status === 'draft' ? ' <span class="cr-pill off">Draft</span>' : ''}</div>
         <h4>${esc(c.title)}</h4><div class="cr-m">${esc(c.instructor || '')}${c.duration_text ? ' · ' + esc(c.duration_text) : ''}</div>
         ${c.description ? `<div class="cr-d">${esc(c.description)}</div>` : ''}
