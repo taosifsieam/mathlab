@@ -83,7 +83,7 @@ html[data-theme=dark] .cr-pill.exp{background:#7f1d1d;color:#fecaca}html[data-th
     const tot = c.chapters.reduce((a, x) => a + x.total, 0), done = c.chapters.reduce((a, x) => a + x.done, 0), p = pct(done, tot);
     z.innerHTML = `<button type="button" class="btn o" id="crb">← My Courses</button>
     <div class="card" style="margin:10px 0"><h3>${esc(c.title)}</h3><div class="cr-m">${esc(c.instructor || '')}${c.duration_text ? ' · ' + esc(c.duration_text) : ''}</div>
-      ${c.description ? `<p>${esc(c.description)}</p>` : ''}
+      ${c.description ? `<p style="white-space:pre-line">${esc(c.description)}</p>` : ''}
       ${c.enrolled ? `<div class="cr-bar"><i style="width:${p}%"></i></div><div class="cr-m">${done}/${tot} lessons · ${p}% complete${c.expires_at ? ' · access until ' + esc(dt(c.expires_at)) : ''}</div>` :
         `<p class="cr-warn" style="margin:8px 0 0">You are not enrolled in this course. Lessons marked <b>Free preview</b> are open to you. <a target="_blank" rel="noopener" href="${esc(wa({ t: c.title }))}">Enroll on WhatsApp</a></p>`}</div>
     <div id="crnote" class="err"></div>
@@ -197,7 +197,7 @@ html[data-theme=dark] .cr-pill.exp{background:#7f1d1d;color:#fecaca}html[data-th
       <label>Status<select id="cfst"><option value="draft" ${c.status !== 'published' ? 'selected' : ''}>Draft (hidden from students)</option><option value="published" ${c.status === 'published' ? 'selected' : ''}>Published</option></select></label>
       <label>Thumbnail link (https://…) <input id="cfth" value="${esc(c.thumbnail_url || '')}"></label></div>
       <label>Or upload a thumbnail (PNG/JPG/WebP, up to 2 MB)<input type="file" id="cff" accept="image/png,image/jpeg,image/webp"></label>
-      <label>Description<textarea id="cfde" rows="3" maxlength="2000">${esc(c.description || '')}</textarea></label><p class="err" id="cfe2"></p>
+      <label>Description<textarea id="cfde" rows="10" maxlength="2000">${esc(c.description || '')}</textarea></label><p class="err" id="cfe2"></p>
       <div class="cr-row"><button type="button" id="cfsave">Save course</button><button type="button" class="btn o" id="cfx">Close</button>${c.id && c.status !== 'published' ? '<button type="button" class="btn o" id="cfdel">Delete course</button>' : ''}</div></div>`;
     $('#cfx').onclick = () => f.innerHTML = '';
     $('#cfsave').onclick = async () => {
