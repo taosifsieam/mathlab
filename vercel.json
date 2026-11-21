@@ -29,5 +29,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/gift",
+      "destination": "/gift.html"
+    }
   ]
 }
