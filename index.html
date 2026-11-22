@@ -405,7 +405,7 @@ if(name.length<2){er('Please enter your full name.');return}if(!strong(pw)){er('
 const o={data:{full_name:name}};if(em)o.emailRedirectTo=location.origin+location.pathname;
 const r=await sb.auth.signUp(em?{email:id,password:pw,options:o}:{phone:id,password:pw,options:o});if(r.error)throw r.error;
 if(r.data.user&&r.data.user.identities&&r.data.user.identities.length===0){er('An account with this email already exists. Please log in.');return}
-if(em)ok('Almost done! Open your email and click the verification link, then log in.');else{pend=id;$('#fo').style.display='block';ok('We sent a code by SMS. Enter it above and press the button again.')}
+if(r.data.session){ok('Account created! Logging you in…');return}if(em)ok('Almost done! Open your email and click the verification link, then log in.');else{pend=id;$('#fo').style.display='block';ok('We sent a code by SMS. Enter it above and press the button again.')}
 return}
 const r=await sb.auth.signInWithPassword(em?{email:id,password:pw}:{phone:id,password:pw});if(r.error)throw r.error;closeAuth();toast('Logged in.')
 }catch(x){er(friendly(x))}};
